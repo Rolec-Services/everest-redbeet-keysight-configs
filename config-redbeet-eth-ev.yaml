@@ -1,0 +1,38 @@
+active_modules:
+  ev_manager:
+    config_module:
+      auto_enable: true
+      auto_exec: false
+      auto_exec_commands: sleep 1;iec_wait_pwr_ready;sleep 1;draw_power_regulated 16,3;sleep 30;unplug
+      connector_id: 1
+    connections:
+      ev:
+        - implementation_id: ev
+          module_id: iso15118_car
+      ev_board_support:
+        - implementation_id: ev_board_support
+          module_id: connector_1_powerpath
+      slac:
+        - implementation_id: main
+          module_id: slac
+    module: EvManager
+
+  iso15118_car:
+    config_module:
+      device: eth0 
+      supported_ISO15118_2: true
+    connections: {}
+    module: PyEvJosev
+
+  connector_1_powerpath:
+    config_module:
+      connector_id: 1
+    connections: {}
+    module: YetiSimulator
+    telemetry:
+      id: 1
+  slac:
+    module: EvSlac
+    config_module:
+      #device: eth0
+
