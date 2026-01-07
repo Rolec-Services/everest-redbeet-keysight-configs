@@ -1,20 +1,26 @@
 settings:
   telemetry_enabled: true
 active_modules:
+
   api:
+    module: API
     connections:
+      ocpp:
+        - module_id: ocpp
+          implementation_id: ocpp_generic
       evse_manager:
         - implementation_id: evse
           module_id: evse_manager
       error_history:
         - module_id: error_history
           implementation_id: error_history
-    module: API
+
   error_history:
     module: ErrorHistory
     config_implementation:
       error_history:
         database_path: /tmp/error_history.db
+
   #auth:
   #  module: Auth
   #  config_module:
@@ -42,12 +48,15 @@ active_modules:
       token_provider:
         - module_id: token_provider
           implementation_id: main
+        #- module_id: ocpp
+        #  implementation_id: auth_provider
       token_validator:
         - module_id: token_validator
           implementation_id: main
       evse_manager:
         - module_id: evse_manager
           implementation_id: evse
+
   token_provider:
     module: DummyTokenProvider
     config_implementation:
@@ -57,6 +66,7 @@ active_modules:
       evse:
         - module_id: evse_manager
           implementation_id: evse
+
   token_validator:
     module: DummyTokenValidator
     config_implementation:
@@ -64,18 +74,21 @@ active_modules:
         validation_result: Accepted
         validation_reason: Token seems valid
         sleep: 0.25
+
   evse_security:
     module: EvseSecurity
     config_module:
       private_key_password: "123456"
 
   energy_manager:
+    module: EnergyManager
     connections:
       energy_trunk:
       - implementation_id: energy_grid
         module_id: grid_connection_point
-    module: EnergyManager
+
   evse_manager:
+    module: EvseManager
     config_module:
       connector_id: 1
       evse_id: DE*PNX*E123456*1
@@ -85,15 +98,15 @@ active_modules:
       charge_mode: AC
       hack_allow_bpt_with_iso2: true
       #ac_enforce_hlc: false
-      #ac_hlc_enabled: true
+      ac_hlc_enabled: true
       #ac_hlc_use_5percent: true
       #ac_nominal_voltage: 230
       #ac_with_soc: false
       #dbg_hlc_auth_after_tstep: false
       #ev_receipt_required: false
       #has_ventilation: false 
-      #payment_enable_contract: false
-      #payment_enable_eim: true
+      payment_enable_contract: true
+      payment_enable_eim: true
     connections:
       bsp:
       - implementation_id: board_support
@@ -107,10 +120,14 @@ active_modules:
       slac:
       - implementation_id: main
         module_id: slac
-    module: EvseManager
     telemetry:
       id: 1
+
   grid_connection_point:
+    module: EnergyNode
+    mapping:
+      module:
+        evse: 1
     config_module:
       fuse_limit_A: 40
       phase_count: 3
@@ -118,27 +135,32 @@ active_modules:
       energy_consumer:
       - implementation_id: energy_grid
         module_id: evse_manager
-    module: EnergyNode
+
   iso15118_charger:
+    module: EvseV2G
     config_module:
       device: eth0
       tls_security: allow
+      verify_contract_cert_chain: false
       supported_DIN70121: false
-    module: EvseV2G
     connections:
       security:
         - module_id: evse_security
           implementation_id: main
+
   #evse_security:
   #  module: EvseSecurity
   #  config_module:
   #    private_key_password: "123456"
+
   persistent_store:
     module: PersistentStore
     config_module:
       sqlite_db_file_path: /etc/everest/everest_persistent_store.db
     connections: {}
+
   setup:
+    module: Setup
     config_module:
       localization: false 
       setup_simulation: true 
@@ -147,8 +169,9 @@ active_modules:
       store:
       - module_id: persistent_store
         implementation_id: main
-    module: Setup
+
   slac:
+    module: EvseSlac
     config_implementation:
       main:
         device: eth0
@@ -156,7 +179,7 @@ active_modules:
         #nid: pionix!
         number_of_sounds: 10
     connections: {}
-    module: EvseSlac
+
   #token_provider_1:
   #  config_implementation:
   #    main:
@@ -171,6 +194,7 @@ active_modules:
   #       serial_port: /dev/ttyAMA5
   #   connections: {}
   #   module: PN532TokenProvider
+
   #token_validator:
   #    main:
   #      sleep: 0.25
@@ -178,6 +202,7 @@ active_modules:
   #      validation_result: Accepted
   #  connections: {}
   #  module: DummyTokenValidator
+
   #yeti_driver:
   #  telemetry:
   #    id: 1
@@ -186,6 +211,7 @@ active_modules:
   #  connections: {}
   #  module: YetiDriver
   #
+
   #token_provider_1:
   #  module: DummyTokenProvider
   #  config_implementation:
@@ -195,6 +221,7 @@ active_modules:
   #    evse:
   #      - module_id: evse_manager
   #        implementation_id: evse
+
   #token_validator:
   #  module: DummyTokenValidator
   #  config_implementation:
@@ -202,8 +229,47 @@ active_modules:
   #      validation_result: Accepted
   #      validation_reason: Token seems valid
   #      sleep: 0.25
+
   yeti_driver:
     module: YetiSimulator
     config_module:
       connector_id: 1
 
+  ocpp:
+    module: OCPP
+    config_module:
+      ChargePointConfigPath: config-test.json
+    connections:
+      evse_manager:
+        - module_id: evse_manager
+          implementation_id: evse
+        # - module_id: evse_manager_2
+        #   implementation_id: evse
+      reservation:
+        - module_id: auth
+          implementation_id: reservation
+      auth:
+        - module_id: auth
+          implementation_id: main
+      system:
+        - module_id: system
+          implementation_id: main
+      security:
+        - module_id: evse_security
+          implementation_id: main
+      display_message:
+        - module_id: display_message
+          implementation_id: display_message
+      evse_energy_sink:
+        - module_id: grid_connection_point
+          implementation_id: external_limits
+        # - module_id: evse_manager_1_ocpp_sink
+        #   implementation_id: external_limits
+        # - module_id: evse_manager_2_ocpp_sink
+        #   implementation_id: external_limits
+          
+  display_message:
+    module: TerminalDisplayMessage
+
+  system:
+    module: System
