@@ -127,10 +127,23 @@ active_modules:
     module: EnergyNode
     mapping:
       module:
+        evse: 0
+    config_module:
+      fuse_limit_A: 32
+      phase_count: 1
+    connections:
+      energy_consumer:
+      - implementation_id: energy_grid
+        module_id: evse_manager
+
+  evse_manager_1_ocpp_sink:
+    module: EnergyNode
+    mapping:
+      module:
         evse: 1
     config_module:
-      fuse_limit_A: 40
-      phase_count: 3
+      fuse_limit_A: 32
+      phase_count: 1
     connections:
       energy_consumer:
       - implementation_id: energy_grid
@@ -238,7 +251,7 @@ active_modules:
   ocpp:
     module: OCPP
     config_module:
-      ChargePointConfigPath: config-test.json
+      ChargePointConfigPath: config-hubject.json
     connections:
       evse_manager:
         - module_id: evse_manager
@@ -263,8 +276,8 @@ active_modules:
       evse_energy_sink:
         - module_id: grid_connection_point
           implementation_id: external_limits
-        # - module_id: evse_manager_1_ocpp_sink
-        #   implementation_id: external_limits
+        - module_id: evse_manager_1_ocpp_sink
+          implementation_id: external_limits
         # - module_id: evse_manager_2_ocpp_sink
         #   implementation_id: external_limits
           
