@@ -152,7 +152,7 @@ active_modules:
   iso15118_charger:
     module: EvseV2G
     config_module:
-      device: eth0
+      device: ctun0
       tls_security: allow
       verify_contract_cert_chain: false
       supported_DIN70121: false
@@ -187,7 +187,7 @@ active_modules:
     module: EvseSlac
     config_implementation:
       main:
-        device: eth0
+        device: ctun0
         #evse_id: PIONIX_SAYS_HELLO
         #nid: pionix!
         number_of_sounds: 10
